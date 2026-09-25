@@ -1,3 +1,4 @@
+/* -------------------initiate block :  start --PG1-------------------  */
 /* =============1============= */
 /* global defaults  */
 * {
@@ -34,10 +35,15 @@ body {
 header {
     background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
     color: #fff;
-    text-align: center;
-    padding: 35px 15px;
+    padding: 20px 30px;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    border-bottom: 3px solid aqua;
 }
 
 header::before {
@@ -51,49 +57,60 @@ header::before {
     pointer-events: none;
 }
 
+.brand {
+    position: relative;
+    z-index: 1;
+}
+
 header h1 {
-    font-size: 1.9rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.3px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 header p {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     opacity: 0.85;
     letter-spacing: 0.3px;
 }
 
-/* Navigation */
-nav {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+/* Navigation — now inside header */
+header nav {
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 15px;
     gap: 10px;
-    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
 }
 
-nav a {
+header nav a {
     color: #065f46;
-    padding: 12px 22px;
+    padding: 9px 18px;
     text-decoration: none;
     font-weight: 600;
+    font-size: 0.9rem;
     transition: all 0.25s ease;
     border-radius: 999px;
     background-color: #ecfdf5;
-    margin-left: 0;
     border: 1px solid #a7f3d0;
+    white-space: nowrap;
 }
 
-nav a:hover {
+header nav a:hover {
     background: linear-gradient(135deg, #059669 0%, #10b981 100%);
     color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 8px 18px rgba(5, 150, 105, 0.3);
     border-color: transparent;
+}
+
+header nav a.active {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 6px 14px rgba(5, 150, 105, 0.3);
 }
 
 /* Footer */
@@ -104,9 +121,11 @@ footer {
     padding: 18px;
     font-size: 0.85rem;
     letter-spacing: 0.3px;
+    border-top: 3px solid aqua;
 }
+/* -------------------End --PG1 --------------------- */
 
-/* ===============3=================== */
+/* ===============================3================================= */
 /* Main content */
 main {
     padding: 35px 30px;
@@ -388,14 +407,7 @@ tbody tr:hover {
     }
 }
 
-/* =============8================= */
-/* Active nav pill */
-nav a.active {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 6px 14px rgba(5, 150, 105, 0.3);
-}
+
 
 /* =============11================= */
 /* Filter bar (students.php) */

@@ -2,7 +2,7 @@
 /**
  * header.php — Shared Page Top
  *
- * Prints the <head>, <header>, and <nav> for every page.
+ * Prints the <head> and the site header (brand + nav).
  * Does NOT open <main> — that belongs to each page.
  *
  * Pages set $pageTitle before including this file.
@@ -25,19 +25,20 @@ $pageTitle = isset($pageTitle) ? $pageTitle : 'Student Course System';
 
 <body>
     <div class="container">
-        <!-- header menu  -->
         <header>
-            <h1>Springfield College of Technology</h1>
-            <p>Student Course Registration System</p>
+            <div class="brand">
+                <h1>Springfield College of Technology</h1>
+                <p>Student Course Registration System</p>
+            </div>
+
+            <nav>
+                <a href="index.php"
+                    class="<?php echo $page === 'index.php' ? 'active' : ''; ?>">Home</a>
+                <a href="register.php"
+                    class="<?php echo $page === 'register.php' ? 'active' : ''; ?>">Register
+                    Student</a>
+                <a href="students.php"
+                    class="<?php echo $page === 'students.php' ? 'active' : ''; ?>">View
+                    Students</a>
+            </nav>
         </header>
-        <!-- navigation panel  -->
-        <nav>
-            <a href="index.php"
-                class="<?php echo $page === 'index.php' ? 'active' : ''; ?>">Home</a>
-            <a href="register.php"
-                class="<?php echo $page === 'register.php' ? 'active' : ''; ?>">Register
-                Student</a>
-            <a href="students.php"
-                class="<?php echo $page === 'students.php' ? 'active' : ''; ?>">View
-                Students</a>
-        </nav>

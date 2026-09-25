@@ -44,7 +44,8 @@ include 'includes/header.php';
 <main>
     <h2>Edit Student</h2>
     <form action="update.php" method="POST">
-        <input type="hidden" name="id" value="<?php echo $student['id']; ?>">
+        <input type="hidden" name="id"
+            value="<?php echo $student['id']; ?>">
 
         <div class="form-group">
             <label for="admission_no">Admission Number</label>
@@ -82,10 +83,10 @@ include 'includes/header.php';
                 $courses = ["Computer Science", "Information Technology",
                             "Business Administration", "Electrical Engineering",
                             "Mechanical Engineering"];
-                $current = $student['course'];
-            ?>
+$current = $student['course'];
+?>
             <select id="course" name="course" required>
-                <option value="">-- Select Course --</option>
+                <option value="" disabled selected>-- Select Course --</option>
                 <?php foreach ($courses as $c): ?>
                 <option value="<?php echo $c; ?>" <?php echo $current === $c ? 'selected' : ''; ?>>
                     <?php echo $c; ?>
