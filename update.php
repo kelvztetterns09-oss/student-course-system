@@ -1,8 +1,23 @@
 <?php
+/**
+ * update.php — Update an Existing Student
+ *
+ * Receives the edit form from edit.php, updates the matching row
+ * in the database, then shows a success or error message.
+ *
+ * This page is never visited directly — it's only reached by
+ * submitting the form on edit.php.
+ */
+
+// ---- Connect to the database ----------------------------------------
 require 'db.php';
 
+// ---- Handle the submitted form --------------------------------------
+// Only run the update if the request is actually a POST.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id           = intval($_POST['id']);
+
+    // Collect and clean each field from the form.
+    $id           = intval($_POST['id']);          // must be an integer
     $admission_no = trim($_POST['admission_no']);
     $full_name    = trim($_POST['full_name']);
     $gender       = trim($_POST['gender']);
@@ -10,65 +25,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email        = trim($_POST['email']);
     $phone        = trim($_POST['phone']);
 
+    // Prepared UPDATE — safely writes the new values.
+    // The placeholder order matches bind_param below.
     $stmt = $conn->prepare(
         "UPDATE students
-         SET admission_no=?, full_name=?, gender=?, course=?, email=?, phone=?
-         WHERE id=?"
+         SET admission_no = ?, full_name = ?, gender = ?, course = ?, email = ?, phone = ?
+         WHERE id = ?"
     );
+
+    // "ssssssi" = six strings followed by one integer (the ID).
     $stmt->bind_param("ssssssi", $admission_no, $full_name, $gender, $course, $email, $phone, $id);
+
+    // Run the update and remember whether it worked.
     $success = $stmt->execute();
+
+    // Clean up.
     $stmt->close();
     $conn->close();
 } else {
+    // Someone opened update.php directly (not via the form).
     $success = false;
 }
+
+// ---- Render the confirmation page -----------------------------------
+$pageTitle = "Update Student";
+include 'includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <title>Update Student</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="../Student_Course_System/images/favc.png">
-</head>
+<main>
+    <?php if ($success): ?>
+    <div class="message success">Student record updated successfully!</div>
+    <?php else: ?>
+    <div class="message error">Failed to update student record.</div>
+    <?php endif; ?>
 
-<body>
-    <div class="container">
-        <header>
-            <h1>Springfield College of Technology</h1>
-            <p>Student Course Registration System</p>
-        </header>
-
-        <?php $page = basename($_SERVER['PHP_SELF']); ?>
-        <nav>
-            <a href="index.php"
-                class="<?php echo $page === 'index.php' ? 'active' : ''; ?>">Home</a>
-            <a href="register.php"
-                class="<?php echo $page === 'register.php' ? 'active' : ''; ?>">Register
-                Student</a>
-            <a href="students.php"
-                class="<?php echo $page === 'students.php' ? 'active' : ''; ?>">View
-                Students</a>
-        </nav>
-
-        <main>
-            <?php if ($success): ?>
-            <div class="message success">Student record updated successfully!</div>
-            <?php else: ?>
-            <div class="message error">Failed to update student record.</div>
-            <?php endif; ?>
-
-            <div class="buttons" style="margin-top:20px;">
-                <a href="students.php" class="btn">Back to Student List</a>
-            </div>
-        </main>
-
-        <footer>
-            &copy; <?php echo date("Y"); ?>
-            Springfield College of Technology. All rights reserved.
-        </footer>
+    <div class="buttons" style="margin-top:20px;">
+        <a href="students.php" class="btn">Back to Student List</a>
     </div>
-</body>
+</main>
 
-</html>
+<?php include 'includes/footer.php'; ?>
