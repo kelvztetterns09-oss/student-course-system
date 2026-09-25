@@ -1,18 +1,87 @@
 <?php
 /**
- * students.php — View All Registered Students
+ * students.php — View All Registered Students (with Search & Filter)
  *
- * Fetches every student from the database and displays them in a
- * responsive table. Each row has Edit and Delete action buttons.
+ * Fetches students from the database and displays them in a table.
+ * Supports optional filtering by:
+ *   - search term (matches admission_no, full_name, or email)
+ *   - course
+ *   - gender
  *
- * If there are no students, an empty-state message is shown instead.
+ * Filters come from the URL via GET so they're shareable/bookmarkable.
  */
 
-// ---- Connect and fetch all students (newest first) ------------------
 require 'db.php';
-$result = $conn->query("SELECT * FROM students ORDER BY id DESC");
 
-// ---- Render the page ------------------------------------------------
+// ---- Read filters from the URL --------------------------------------
+// If a filter isn't set, it defaults to an empty string.
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$course = isset($_GET['course']) ? trim($_GET['course']) : '';
+$gender = isset($_GET['gender']) ? trim($_GET['gender']) : '';
+
+// ---- Build the query dynamically ------------------------------------
+// Start with a base SELECT, then append conditions only for the
+// filters that were actually provided.
+$sql    = "SELECT * FROM students";
+$where  = [];
+$params = [];
+$types  = "";
+
+// Search: match against three columns using LIKE
+if ($search !== '') {
+    $where[]  = "(admission_no LIKE ? OR full_name LIKE ? OR email LIKE ?)";
+    $like     = "%" . $search . "%";
+    $params[] = $like;
+    $params[] = $like;
+    $params[] = $like;
+    $types   .= "sss";
+}
+
+// Course: exact match
+if ($course !== '') {
+    $where[]  = "course = ?";
+    $params[] = $course;
+    $types   .= "s";
+}
+
+// Gender: exact match
+if ($gender !== '') {
+    $where[]  = "gender = ?";
+    $params[] = $gender;
+    $types   .= "s";
+}
+
+// Attach WHERE clause if any filters were applied
+if (!empty($where)) {
+    $sql .= " WHERE " . implode(" AND ", $where);
+}
+
+$sql .= " ORDER BY id DESC";
+
+// ---- Prepare and run -------------------------------------------------
+$stmt = $conn->prepare($sql);
+
+// bind_param needs the values by reference — use the spread trick
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Count how many rows matched (for the feedback line)
+$total = $result->num_rows;
+
+// Courses list for the dropdown (mirror of register.php)
+$courses = [
+    "Computer Science",
+    "Information Technology",
+    "Business Administration",
+    "Electrical Engineering",
+    "Mechanical Engineering"
+];
+
+// ---- Render ---------------------------------------------------------
 $pageTitle = "View Students";
 include 'includes/header.php';
 ?>
@@ -20,7 +89,55 @@ include 'includes/header.php';
 <main>
     <h2>Registered Students</h2>
 
-    <?php if ($result && $result->num_rows > 0): ?>
+    <!-- Filter bar -->
+    <form method="GET" action="students.php" class="filter-bar">
+        <div class="form-group">
+            <label for="search">Search</label>
+            <input type="text" id="search" name="search" placeholder="Admission no, name, or email"
+                value="<?php echo htmlspecialchars($search); ?>">
+        </div>
+
+        <div class="form-group">
+            <label for="course">Course</label>
+            <select id="course" name="course">
+                <option value="">All Courses</option>
+                <?php foreach ($courses as $c): ?>
+                <option value="<?php echo $c; ?>" <?php echo $course === $c ? 'selected' : ''; ?>>
+                    <?php echo $c; ?>
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender">
+                <option value="">All Genders</option>
+                <option value="Male" <?php echo $gender === 'Male' ? 'selected' : ''; ?>>Male
+                </option>
+                <option value="Female" <?php echo $gender === 'Female' ? 'selected' : ''; ?>>Female
+                </option>
+                <option value="Other" <?php echo $gender === 'Other' ? 'selected' : ''; ?>>Other
+                </option>
+            </select>
+        </div>
+
+        <div class="actions-row">
+            <button type="submit" class="btn">Filter</button>
+            <a href="students.php" class="btn btn-secondary">Clear</a>
+        </div>
+    </form>
+
+    <!-- Result count -->
+    <?php if ($total > 0): ?>
+    <p class="result-count">
+        Showing <?php echo $total; ?>
+        result<?php echo $total === 1 ? '' : 's'; ?>.
+    </p>
+    <?php endif; ?>
+
+    <!-- Table or empty state -->
+    <?php if ($total > 0): ?>
     <div class="table-wrapper">
         <table>
             <thead>
@@ -70,9 +187,19 @@ include 'includes/header.php';
         </table>
     </div>
     <?php else: ?>
-    <p class="empty">No students registered yet.</p>
+    <p class="empty">
+        <?php if ($search || $course || $gender): ?>
+        No students match your filters.
+        <?php else: ?>
+        No students registered yet.
+        <?php endif; ?>
+    </p>
     <div class="buttons" style="margin-top:20px;">
+        <?php if ($search || $course || $gender): ?>
+        <a href="students.php" class="btn btn-secondary">Clear Filters</a>
+        <?php else: ?>
         <a href="register.php" class="btn">Register First Student</a>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 </main>
